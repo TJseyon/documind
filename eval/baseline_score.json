@@ -1,0 +1,7 @@
+{
+  "_readme": "Fill this in after your first real eval run against your own 30-50 question test set (see eval/run_eval.py). These numbers are the regression floor -- tests/eval/test_eval_regression.py fails if a later run drops more than `tolerance` below them. Placeholder values below are deliberately conservative; replace with your actual first-run numbers.",
+  "retrieval_hit_rate": 0.7,
+  "contains_answer_rate": 0.6,
+  "groundedness_rate": 0.8,
+  "tolerance": 0.05
+}

@@ -1,0 +1,47 @@
+{
+  "_readme": "This is a STARTER set of 6 examples built from the sample_docs/ included in this repo, purely so the eval harness runs out of the box. Before you put this project on your resume, replace this with 30-50 questions you write BY HAND against YOUR OWN documents. That's the whole point of the exercise: retrieval precision and groundedness numbers are only meaningful when the questions weren't written by the same pipeline you're testing.",
+  "cases": [
+    {
+      "id": "q1",
+      "question": "How many vacation days do full-time employees get per year?",
+      "expected_source_document": "employee_handbook.docx",
+      "expected_answer_substring": "20",
+      "notes": ""
+    },
+    {
+      "id": "q2",
+      "question": "What is the maximum weight the SR-40 drone can carry?",
+      "expected_source_document": "product_spec.pdf",
+      "expected_answer_substring": "2.5",
+      "notes": ""
+    },
+    {
+      "id": "q3",
+      "question": "Who do employees contact to enroll in the 401k plan?",
+      "expected_source_document": "employee_handbook.docx",
+      "expected_answer_substring": "HR",
+      "notes": ""
+    },
+    {
+      "id": "q4",
+      "question": "What is the flight time of the SR-40 drone on a single charge?",
+      "expected_source_document": "product_spec.pdf",
+      "expected_answer_substring": "28",
+      "notes": ""
+    },
+    {
+      "id": "q5",
+      "question": "How many sick days do employees receive per year?",
+      "expected_source_document": "employee_handbook.docx",
+      "expected_answer_substring": "10",
+      "notes": ""
+    },
+    {
+      "id": "q6",
+      "question": "What is the maximum flight altitude of the SR-40 drone?",
+      "expected_source_document": "product_spec.pdf",
+      "expected_answer_substring": "120",
+      "notes": ""
+    }
+  ]
+}

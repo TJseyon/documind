@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DocuMind — Ask your documents anything</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel-bg: #ffffff;
+    --border: #d6d6d6;
+    --text: #111111;
+    --text-dim: #666666;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+  .status-dot.online { background: #111111; }
+  .status-dot.offline { background: #b0b0b0; }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .panel h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .dropzone {
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+  .dropzone:hover, .dropzone.dragover {
+    border-color: #999999;
+    background: #fafafa;
+  }
+  .dropzone p {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .dropzone span {
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  input[type="file"] { display: none; }
+
+  button {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 4px;
+    padding: 10px 18px;
+    border: 1px solid #ffffff;
+    background: #ffffff;
+    color: #000000;
+    cursor: pointer;
+    transition: background-color 175ms ease, border-color 175ms ease;
+  }
+  button:hover:not(:disabled) {
+    background: #e2e2e2;
+    border-color: #e2e2e2;
+    color: #000000;
+  }
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  button:focus-visible, input:focus-visible, .dropzone:focus-visible {
+    outline: 2px solid #111111;
+    outline-offset: 2px;
+  }
+
+  .icon-btn {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+  .icon-btn:hover:not(:disabled) {
+    background: #2b2b2b;
+    border-color: #2b2b2b;
+    color: #ffffff;
+  }
+
+  .doc-list { list-style: none; margin: 0; padding: 0; }
+  .doc-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .doc-name {
+    font-weight: 500;
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .empty-note {
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .ask-row {
+    display: flex;
+    gap: 8px;
+  }
+  .ask-row input[type="text"] {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--text);
+  }
+  .ask-row input[type="text"]::placeholder { color: var(--text-dim); }
+  .ask-row input[type="text"]:focus {
+    outline: none;
+    border-color: #111111;
+  }
+
+  .answer-text {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 12px;
+  }
+  .badge {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .badge.warn {
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  details {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .source-item {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--border);
+  }
+  .source-item .from {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 12px;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #cccccc;
+    border-top-color: #111111;
+    display: inline-block;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+  }
+
+  .message {
+    font-size: 14px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: #fafafa;
+    color: var(--text);
+  }
+  .message.error {
+    border-left: 3px solid #000000;
+  }
+  .message.success {
+    border-left: 3px solid #999999;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 24px;
+  }
+  footer a { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>DocuMind</h1>
+    <p class="tagline">Ask your documents anything.</p>
+    <div class="status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Checking connection…</span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>Add a document</h2>
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Add a document">
+      <p id="dropzoneText">Drop a file here, or click to choose one</p>
+      <span>PDF, Word, or plain text — up to 20MB</span>
+      <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.md" />
+    </div>
+    <div id="uploadMessage"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Your documents</h2>
+    <ul class="doc-list" id="docList">
+      <li><span class="empty-note">Loading…</span></li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>Ask something</h2>
+    <div class="ask-row">
+      <input type="text" id="questionInput" placeholder="e.g. How many vacation days do I get?" />
+      <button id="askBtn">Ask</button>
+    </div>
+    <div id="askMessage"></div>
+  </section>
+
+  <section class="panel" id="answerPanel" style="display:none;">
+    <h2>Answer</h2>
+    <div id="answerBadge"></div>
+    <p class="answer-text" id="answerText"></p>
+    <details id="sourcesDetails">
+      <summary>Show where this came from</summary>
+      <div id="sourcesList"></div>
+    </details>
+  </section>
+
+  <footer>
+    Full technical details live at <a href="/docs">/docs</a>
+  </footer>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const FRIENDLY_ERRORS = {
+    unsupported_file_type: "That file type isn't supported yet. Try a PDF, Word document, or text file.",
+    file_too_large: "That file is too big to add. Try a smaller one.",
+    empty_document: "That document looks empty — there's no readable text in it.",
+    extraction_failed: "Something went wrong reading that file. Try a different one.",
+    embedding_failed: "Couldn't process that document. If this is your first upload, check your internet connection — the AI model needs to download once.",
+    no_documents_indexed: "Add a document first — there's nothing to search yet.",
+    validation_error: "Try asking a fuller question — a couple of words isn't quite enough.",
+    llm_call_failed: "Couldn't reach the AI model. Check that your API key is set up correctly.",
+    document_not_found: "That document isn't in the list anymore.",
+    internal_error: "Something went wrong on the server. Check the terminal running the app for details.",
+  };
+
+  function friendlyError(body) {
+    if (body && body.error_code && FRIENDLY_ERRORS[body.error_code]) {
+      return FRIENDLY_ERRORS[body.error_code];
+    }
+    return "Something went wrong. Please try again.";
+  }
+
+  function showErrorMessage(el, body) {
+    const friendly = friendlyError(body);
+    const raw = body && body.detail ? body.detail : null;
+    el.innerHTML = `<div class="message error">${friendly}${
+      raw ? `<div style="margin-top:6px;font-size:12px;color:var(--text-dim);">Technical detail: ${escapeHtml(raw)}</div>` : ""
+    }</div>`;
+  }
+
+  function showMessage(el, text, kind) {
+    el.innerHTML = `<div class="message ${kind}">${text}</div>`;
+  }
+
+  function clearMessage(el) {
+    el.innerHTML = "";
+  }
+
+  async function checkStatus() {
+    const dot = $("statusDot");
+    const text = $("statusText");
+    try {
+      const res = await fetch("/health");
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      dot.className = "status-dot online";
+      text.textContent = `Online — ${data.documents_indexed} document${data.documents_indexed === 1 ? "" : "s"} ready`;
+    } catch {
+      dot.className = "status-dot offline";
+      text.textContent = "Can't reach the server";
+    }
+  }
+
+  async function loadDocuments() {
+    const list = $("docList");
+    try {
+      const res = await fetch("/documents");
+      const docs = await res.json();
+      if (!docs.length) {
+        list.innerHTML = `<li><span class="empty-note">No documents yet — add one above to get started.</span></li>`;
+        return;
+      }
+      list.innerHTML = docs
+        .map(
+          (doc) => `
+        <li>
+          <span class="doc-name">${escapeHtml(doc.filename)}</span>
+          <button class="icon-btn" data-filename="${escapeHtml(doc.filename)}">Remove</button>
+        </li>`
+        )
+        .join("");
+      list.querySelectorAll(".icon-btn").forEach((btn) => {
+        btn.addEventListener("click", () => deleteDocument(btn.dataset.filename));
+      });
+    } catch {
+      list.innerHTML = `<li><span class="empty-note">Couldn't load your documents right now.</span></li>`;
+    }
+  }
+
+  async function deleteDocument(filename) {
+    try {
+      await fetch(`/documents/${encodeURIComponent(filename)}`, { method: "DELETE" });
+      await loadDocuments();
+      await checkStatus();
+    } catch {
+      // silent -- list simply won't update; user can retry
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  const dropzone = $("dropzone");
+  const fileInput = $("fileInput");
+  const dropzoneText = $("dropzoneText");
+  const uploadMessage = $("uploadMessage");
+
+  dropzone.addEventListener("click", () => fileInput.click());
+  dropzone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") fileInput.click();
+  });
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length) uploadFile(fileInput.files[0]);
+  });
+
+  async function uploadFile(file) {
+    clearMessage(uploadMessage);
+    dropzoneText.innerHTML = `<span class="spinner"></span> Adding "${escapeHtml(file.name)}"…`;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/ingest", { method: "POST", body: formData });
+      const body = await res.json();
+      if (!res.ok) {
+        showErrorMessage(uploadMessage, body);
+      } else {
+        showMessage(uploadMessage, `"${escapeHtml(body.filename)}" is ready. Ask it something below.`, "success");
+        await loadDocuments();
+        await checkStatus();
+      }
+    } catch {
+      showMessage(uploadMessage, "Couldn't reach the server. Is it still running?", "error");
+    } finally {
+      dropzoneText.textContent = "Drop a file here, or click to choose one";
+      fileInput.value = "";
+    }
+  }
+
+  const askBtn = $("askBtn");
+  const questionInput = $("questionInput");
+  const askMessage = $("askMessage");
+  const answerPanel = $("answerPanel");
+  const answerText = $("answerText");
+  const answerBadge = $("answerBadge");
+  const sourcesList = $("sourcesList");
+  const sourcesDetails = $("sourcesDetails");
+
+  askBtn.addEventListener("click", askQuestion);
+  questionInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") askQuestion();
+  });
+
+  async function askQuestion() {
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    clearMessage(askMessage);
+    answerPanel.style.display = "none";
+    askBtn.disabled = true;
+    askBtn.innerHTML = `<span class="spinner"></span> Thinking…`;
+
+    try {
+      const res = await fetch("/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const body = await res.json();
+
+      if (!res.ok) {
+        showErrorMessage(askMessage, body);
+        return;
+      }
+
+      answerText.textContent = body.answer;
+      answerBadge.innerHTML = body.grounded
+        ? `<span class="badge good">✓ Backed by your documents</span>`
+        : `<span class="badge warn">⚠ Couldn't fully verify this one</span>`;
+
+      if (body.citations && body.citations.length) {
+        sourcesList.innerHTML = body.citations
+          .map(
+            (c) => `
+          <div class="source-item">
+            <div class="from">From: ${escapeHtml(c.source_filename)}</div>
+            <div>${escapeHtml(c.text_snippet)}</div>
+          </div>`
+          )
+          .join("");
+        sourcesDetails.style.display = "block";
+      } else {
+        sourcesDetails.style.display = "none";
+      }
+
+      answerPanel.style.display = "block";
+    } catch {
+      showMessage(askMessage, "Couldn't reach the server. Is it still running?", "error");
+    } finally {
+      askBtn.disabled = false;
+      askBtn.textContent = "Ask";
+    }
+  }
+
+  checkStatus();
+  loadDocuments();
+</script>
+
+</body>
+</html>

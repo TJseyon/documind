@@ -1,0 +1,23 @@
+services:
+  documind:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Persist the vector store, BM25 corpus, and SQLite metadata across
+      # container restarts -- and cache downloaded model weights so they
+      # aren't re-fetched from Hugging Face on every rebuild.
+      - documind_data:/app/data
+      - model_cache:/root/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+
+volumes:
+  documind_data:
+  model_cache:

@@ -1,0 +1,1 @@
+Este es un documento de ejemplo escrito completamente en español. Contiene varias oraciones para que el detector de idioma tenga suficiente texto para analizar con confianza.

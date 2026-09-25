@@ -1,0 +1,23 @@
+New Hire Onboarding FAQ
+
+Q: When do I get my laptop?
+A: IT ships your laptop to arrive by your start date. If it hasn't arrived
+two business days before you start, contact it-support@example.com.
+
+Q: How do I set up payroll?
+A: Payroll setup happens automatically from the information you submit in
+Workday during your first week. Direct deposit typically activates within
+one pay cycle.
+
+Q: Who is my point of contact for benefits questions?
+A: Contact HR at hr@example.com or through the internal HR portal. HR
+handles health insurance enrollment, 401k enrollment, and any benefits
+questions.
+
+Q: What is the dress code?
+A: Business casual for office days. Fully remote employees have no dress
+code requirement.
+
+Q: How many monitors can I request for my home office?
+A: Employees may request up to two external monitors through the IT
+equipment request form.
