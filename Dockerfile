@@ -14,6 +14,7 @@ COPY app ./app
 COPY eval ./eval
 COPY scripts ./scripts
 COPY sample_docs ./sample_docs
+COPY static ./static
 
 RUN mkdir -p /app/data
 
