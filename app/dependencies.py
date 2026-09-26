@@ -12,7 +12,7 @@ from app.generation.llm_client import AnthropicLLMClient, GeminiLLMClient, LLMCl
 from app.ingestion.pipeline import IngestionPipeline
 from app.query_pipeline import QueryPipeline
 from app.retrieval.bm25_index import BM25Index, KeywordIndex
-from app.retrieval.embeddings import EmbeddingModel, get_embedder
+from app.retrieval.embeddings import EmbeddingModel, GeminiEmbedder, get_embedder
 from app.retrieval.reranker import CrossEncoderReranker, NoOpReranker, Reranker
 from app.retrieval.vector_store import ChromaVectorStore, VectorStore
 
@@ -32,9 +32,18 @@ def get_keyword_index() -> KeywordIndex:
     return BM25Index(get_settings().bm25_corpus_path)
 
 
-def get_embedding_model() -> EmbeddingModel:
-    s = get_settings()
+def build_embedding_model(s: Settings) -> EmbeddingModel:
+    """Pure factory function, separated from get_embedding_model so provider
+    selection can be unit tested without going through the lru_cache'd
+    get_settings() singleton (same pattern as build_llm_client above)."""
+    if s.embedding_provider == "gemini":
+        return GeminiEmbedder(api_key=s.gemini_api_key, model=s.gemini_embedding_model)
     return get_embedder(s.embedding_model_name, s.embedding_batch_size)
+
+
+@lru_cache
+def get_embedding_model() -> EmbeddingModel:
+    return build_embedding_model(get_settings())
 
 
 @lru_cache

@@ -81,7 +81,7 @@ class IngestionPipeline:
             chunk_ids = [f"{document_id}::{c.index}" for c in chunks]
             texts = [c.text for c in chunks]
             try:
-                embeddings = self._embedder.embed(texts)
+                embeddings = self._embedder.embed(texts, task_type="RETRIEVAL_DOCUMENT")
             except Exception as e:  # noqa: BLE001 - convert ANY embedding failure into a clear, readable error
                 raise EmbeddingError(
                     f"Could not generate embeddings for '{original_filename}': {e}. "

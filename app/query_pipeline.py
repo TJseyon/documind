@@ -3,7 +3,7 @@ from typing import List
 
 from app.config import Settings
 from app.db.metadata_store import MetadataStore
-from app.exceptions import NoDocumentsIndexedError
+from app.exceptions import EmbeddingError, NoDocumentsIndexedError
 from app.generation.grounding import check_groundedness
 from app.generation.llm_client import LLMClient
 from app.models import Citation, QueryResponse
@@ -41,7 +41,10 @@ class QueryPipeline:
         if self._vector_store.count() == 0:
             raise NoDocumentsIndexedError("No documents have been ingested yet. Call /ingest first.")
 
-        query_embedding = self._embedder.embed([question])[0]
+        try:
+            query_embedding = self._embedder.embed([question], task_type="RETRIEVAL_QUERY")[0]
+        except Exception as e:  # noqa: BLE001 - convert ANY embedding failure into a clear, readable error
+            raise EmbeddingError(f"Could not process your question: {e}") from e
         vector_matches = self._vector_store.query(query_embedding, top_k=s.top_k_vector)
         bm25_matches = self._keyword_index.search(question, top_k=s.top_k_bm25)
 

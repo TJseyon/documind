@@ -36,8 +36,10 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.6-flash"
 
     # --- Embeddings ---
+    embedding_provider: str = "local"  # "local" (sentence-transformers, needs ~500MB+ RAM) or "gemini" (API call, low memory -- use this on free/small hosting)
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_batch_size: int = 32
+    gemini_embedding_model: str = "gemini-embedding-001"
 
     # --- Reranking ---
     reranker_model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
